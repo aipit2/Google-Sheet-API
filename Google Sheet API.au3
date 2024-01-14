@@ -1,5 +1,3 @@
-;~ #include <_HttpRequest.au3> ; Phải include _HttpRequest.au3 trước khi include thư viện GGSheet_API.au3
-;~ #include <Array.au3>
 Global $GGSheet_CryptoJS_FILE = ""
 Global Const $GGSheet_CryptoJS_URL = "https://raw.githubusercontent.com/aipit2/jsrsasign/main/jsrsasign.js"
 Global $GGSheet_CryptoJS = ""
@@ -220,22 +218,28 @@ Func GGSheet_SheetList()
 		GGSheet_Create_Access_Token()
 		Return GGSheet_SheetList()
 	EndIf
-	Local $aSheetName = StringRegExp($res,'title": "(.*?)"',3)
-	If @error Then
-		Return SetError(2,0,$res)
+
+	Local $json = _HttpRequest_ParseJSON($res)
+	If $json = False Then
+		Return SetError(1,0,"Không thể tạo JSON từ Response")
 	EndIf
 
-	Local $aSheetId = StringRegExp($res,'sheetId": (\d+)',3)
+	Local $filter_sheet_id = $json.filter('$.sheets..sheetId')
+	Local $sheet_ids = _HttpRequest_ParseJSON($filter_sheet_id)
+	If $sheet_ids = False Then
+		Return SetError(2,0,"Không tìm thấy sheet_id")
+	EndIf
+
+	Local $filter_sheet_name = $json.filter('$.sheets..title')
+	Local $sheet_names = _HttpRequest_ParseJSON($filter_sheet_name)
+	If $sheet_names = False Then
+		Return SetError(3,0,"Không tìm thấy sheet_name")
+	EndIf
+
+	$aResult =  _Array2DCreate($sheet_names,$sheet_ids)
 	If @error Then
 		Return SetError(3,0,$res)
 	EndIf
-
-	Redim $aResult[UBound($aSheetId)][2]
-
-	For $i = 0 To UBound($aSheetId) - 1
-		$aResult[$i][0] = $aSheetName[$i+1]
-		$aResult[$i][1] = $aSheetId[$i]
-	Next
 
 	Return $aResult
 EndFunc
