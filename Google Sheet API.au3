@@ -224,13 +224,13 @@ Func GGSheet_SheetList()
 		Return SetError(1,0,"Không thể tạo JSON từ Response")
 	EndIf
 
-	Local $filter_sheet_id = $json.filter('$.sheets..sheetId')
+	Local $filter_sheet_id = $json.filter('$.sheets[*].properties.sheetId')
 	Local $sheet_ids = _HttpRequest_ParseJSON($filter_sheet_id)
 	If $sheet_ids = False Then
 		Return SetError(2,0,"Không tìm thấy sheet_id")
 	EndIf
 
-	Local $filter_sheet_name = $json.filter('$.sheets..title')
+	Local $filter_sheet_name = $json.filter('$.sheets[*].properties.title')
 	Local $sheet_names = _HttpRequest_ParseJSON($filter_sheet_name)
 	If $sheet_names = False Then
 		Return SetError(3,0,"Không tìm thấy sheet_name")
@@ -243,7 +243,6 @@ Func GGSheet_SheetList()
 
 	Return $aResult
 EndFunc
-
 ; #FUNCTION# ====================================================================================================================
 ; Name ..........: GGSheet_SheetFind
 ; Description ...: Tìm kiếm sheet_id từ tên của sheet
