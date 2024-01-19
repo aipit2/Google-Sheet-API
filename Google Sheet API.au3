@@ -243,6 +243,7 @@ Func GGSheet_SheetList()
 
 	Return $aResult
 EndFunc
+
 ; #FUNCTION# ====================================================================================================================
 ; Name ..........: GGSheet_SheetFind
 ; Description ...: Tìm kiếm sheet_id từ tên của sheet
@@ -305,6 +306,25 @@ EndFunc
 ; ===============================================================================================================================
 Func GGSheet_Is_Access_Token_Expired($res)
 	Return StringRegExp($res,'ACCESS_TOKEN_EXPIRED',0)
+EndFunc
+
+; #FUNCTION# ====================================================================================================================
+; Name ..........: GGSheet_LastRow
+; Description ...:
+; Syntax ........: GGSheet_LastRow($sheet_name, $column_name)
+; Parameters ....: $sheet_name          - a string value.
+;                  $column_name         - an unknown value.
+; Return values .: Success - Return index của dòng cuối cùng dòng đầu tiên sẽ là 1
+;               .: Failure - @error - Return sẽ là response nhận được từ server
+; Author ........: Trần Hùng
+; ===============================================================================================================================
+Func GGSheet_LastRow($sheet_name,$column_name)
+	Local $aValue = GGSheet_Read($sheet_name & "!" & $column_name & ":" & $column_name)
+	If @error Then
+		Return SetError(1,0,$aValue)
+	EndIf
+
+	Return UBound($aValue)
 EndFunc
 
 Func __ArrayToString($array)
