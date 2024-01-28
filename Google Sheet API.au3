@@ -1,10 +1,11 @@
-Global $GGSheet_CryptoJS_FILE = ""
 Global Const $GGSheet_CryptoJS_URL = "https://raw.githubusercontent.com/aipit2/jsrsasign/main/jsrsasign.js"
-Global $GGSheet_CryptoJS = ""
-Global $GGSheet_Access_Token = ""
-Global $GGSheet_Service_Account_File = ""
-Global $GGSheet_SpreadSheet_Id = ""
-Global $GGSheet_Header = ""
+Global $GGSheet_CryptoJS_FILE 			= ""
+Global $GGSheet_CryptoJS 				= ""
+Global $GGSheet_Access_Token 			= ""
+Global $GGSheet_Service_Account_File 	= ""
+Global $GGSheet_SpreadSheet_Id 			= ""
+Global $GGSheet_Header 					= ""
+
 ; #FUNCTION# ====================================================================================================================
 ; Name ..........: GGSheet_Setup
 ; Description ...: Kiểm tra có thư viện không - Kiểm tra xem có file jsrsasign.js trong thư mục chính không, nếu không thì load thư viện trên github
@@ -116,8 +117,8 @@ Func GGSheet_Read($range)
 
 	If $json == False Then
 		Return SetError(1,0,$res)
-	ElseIf $json.values == False Then
-		Return SetError(2,0,$res)
+	ElseIf $json.values == False Then ; Có nghĩa là ô này trống
+		Return SetError(2,0,'')
 	EndIf
 
 	Local $result = _Make2Array($json.values.toStr())
@@ -308,23 +309,31 @@ Func GGSheet_Is_Access_Token_Expired($res)
 	Return StringRegExp($res,'ACCESS_TOKEN_EXPIRED',0)
 EndFunc
 
-; #FUNCTION# ====================================================================================================================
-; Name ..........: GGSheet_LastRow
-; Description ...:
-; Syntax ........: GGSheet_LastRow($sheet_name, $column_name)
-; Parameters ....: $sheet_name          - a string value.
-;                  $column_name         - an unknown value.
-; Return values .: Success - Return index của dòng cuối cùng dòng đầu tiên sẽ là 1
-;               .: Failure - @error - Return sẽ là response nhận được từ server
-; Author ........: Trần Hùng
-; ===============================================================================================================================
 Func GGSheet_LastRow($sheet_name,$column_name)
 	Local $aValue = GGSheet_Read($sheet_name & "!" & $column_name & ":" & $column_name)
 	If @error Then
-		Return SetError(1,0,$aValue)
+		If @error = 2 Then
+			Return 1 ; Nếu ô thứ 1 trống thì Return 1
+		Else
+			Return SetError(1,0,$aValue)
+		EndIf
 	EndIf
 
-	Return UBound($aValue)
+	If IsArray($aValue) Then
+		Return UBound($aValue)
+	Else
+		Return 1
+	EndIf
+EndFunc
+
+Func GGSheet_Clear($range)
+	Local $url = 'https://sheets.googleapis.com/v4/spreadsheets/'&$GGSheet_SpreadSheet_Id&'/values/'&$range&':clear'
+	Local $res = _HttpRequest(2,$url,'','','',$GGSheet_Header,'POST')
+	If StringRegExp($res,'clearedRange',0) = 1 Then
+		Return True
+	Else
+		Return SetError(1,0,$res)
+	EndIf
 EndFunc
 
 Func __ArrayToString($array)
