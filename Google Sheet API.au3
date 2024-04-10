@@ -141,7 +141,7 @@ EndFunc
 ; ===============================================================================================================================
 Func GGSheet_Write($range,$value)
 	Local $data
-	Local $url = "https://sheets.googleapis.com/v4/spreadsheets/" & $GGSheet_SpreadSheet_Id & "/values/" & $range & "?valueInputOption=RAW"
+	Local $url = "https://sheets.googleapis.com/v4/spreadsheets/" & $GGSheet_SpreadSheet_Id & "/values/" & $range & "?valueInputOption=USER_ENTERED"
 	If StringRegExp($range,"\:",0) = 1 Then
 		$data = '{"values": ' & __ArrayToString($value) & '}'
 	Else
